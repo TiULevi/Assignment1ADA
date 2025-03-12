@@ -6,10 +6,10 @@
 This project implements a **microservices-based** Service-Oriented Application (SOA) using **Domain-Driven Design (DDD)** principles. The application processes **MRI brain images** for patient diagnosis using **Google Cloud Storage, BigQuery, Docker, Kubernetes, and CI/CD pipelines**.
 
 ### **Key Components:**
-- **Training API:** Trains machine learning models.
+- **Training API:** Trains multiple machine learning models. During Data Engineering we were told to train multiple models and not only 1
 - **Prediction API:** Performs batch inference on MRI images.
 - **Prediction UI:** Frontend interface for users.
-- **CI/CD Pipelines:** Automated deployment with Google Cloud Build.
+- **CI/CD Pipelines:** Automated deployment with Google Cloud Build in a Kubernetes Cluster.
 
 ---
 ## **2. Architecture Overview**
@@ -28,8 +28,8 @@ The system follows a **microservices architecture** with Kubernetes-based contai
 |-----------------|-------------------------|
 | Data Storage    | Google Cloud Storage, BigQuery |
 | Model Training  | TensorFlow/PyTorch, Vertex AI |
-| APIs            | FastAPI (Python)         |
-| UI              | React.js (Next.js)       |
+| APIs            | RESTful APIs        |
+| UI              | Not chosen yet (flask?)       |
 | Containerization| Docker                   |
 | Orchestration   | Kubernetes (GKE)        |
 | CI/CD           | Cloud Build, Cloud Functions |
@@ -58,7 +58,7 @@ Applying **DDD principles**, the system is broken into subdomains:
 
 ---
 ## **4. Microservices Architecture**
-Each microservice communicates via **REST APIs**.
+Each microservice communicates via **RESTful APIs**.
 
 ### **4.1 Training API**
 #### **Responsibilities:**
