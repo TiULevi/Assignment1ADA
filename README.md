@@ -277,12 +277,14 @@ MODEL_BUCKET=gs://YOUR_BUCKET_NAME/model.pkl
 from pydantic import BaseModel
 
 class Patient(BaseModel):
+
     id: str
     age: int
     gender: int
     mmse: float
 
 class DiagnosisPrediction(BaseModel):
+
     diagnosis: str
     confidence: float
 
