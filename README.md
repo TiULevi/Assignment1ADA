@@ -141,33 +141,30 @@ Automated pipelines using **Google Cloud Build**.
 - **Monitoring:** Prometheus, Grafana.
 - **Security:** Role-Based Access Control (RBAC), Cloud IAM.
 
-#Stappenplan
-# Alzheimer's Diagnosis Microservices: Full Project Scaffold
-# =======================================
-# This scaffold covers all key components required for Assignment 2.
+# Stappenplan
+### Alzheimer's Diagnosis Microservices: Full Project Scaffold
 
-# ✅ Assume this structure will be zipped and deployed, following GCP standards.
-# ✅ Your AI model is trained in a notebook, and you simulate classification in a microservice (REST or FaaS).
-# ✅ MRI images are preprocessed; training is simulated.
+### This scaffold covers all key components required for Assignment 2.
 
-# ============================================================
-# I. MICROSERVICE STRUCTURE OVERVIEW
-# ============================================================
-# - patient-service          (REST - Cloud Run)
-# - data-ingestion-service   (REST - Cloud Run)
-# - ai-classification-fn     (FaaS - Cloud Function, triggered by Pub/Sub)
-# - feedback-service-fn      (FaaS - Cloud Function, triggered by HTTP)
-# - report-service           (REST - Cloud Run)
-# - model-management-service (REST - Cloud Run)
-# - common/                  (Shared data structures)
+###  Assume this structure will be zipped and deployed, following GCP standards.
+###  Your AI model is trained in a notebook, and you simulate classification in a microservice (REST or FaaS).
+###  MRI images are preprocessed; training is simulated.
 
-# ============================================================
+### I. MICROSERVICE STRUCTURE OVERVIEW
+
+#### - patient-service          (REST - Cloud Run)
+#### - data-ingestion-service   (REST - Cloud Run)
+#### - ai-classification-fn     (FaaS - Cloud Function, triggered by Pub/Sub)
+#### - feedback-service-fn      (FaaS - Cloud Function, triggered by HTTP)
+#### - report-service           (REST - Cloud Run)
+#### - model-management-service (REST - Cloud Run)
+#### - common/                  (Shared data structures)
+
+
 # II. EXAMPLE FILES (ONLY KEY FILES SHOWN HERE)
-# ============================================================
 
-# =============================
-# patient-service/main.py
-# =============================
+### patient-service/main.py
+
 from flask import Flask, request, jsonify
 app = Flask(__name__)
 
@@ -194,9 +191,8 @@ if __name__ == '__main__':
     app.run(debug=True)
 
 
-# =============================
-# Dockerfile (for REST services)
-# =============================
+
+### Dockerfile (for REST services)
 FROM python:3.10-slim
 WORKDIR /app
 COPY requirements.txt ./
@@ -205,16 +201,14 @@ COPY . .
 CMD ["python", "main.py"]
 
 
-# =============================
-# requirements.txt (for REST services)
-# =============================
+### requirements.txt (for REST services)
+
 Flask==2.2.5
 google-cloud-pubsub
 
 
-# =============================
-# ai-classification-fn/main.py
-# =============================
+### ai-classification-fn/main.py
+
 import base64
 import json
 
@@ -229,9 +223,8 @@ def classify(event, context):
     # Normally, publish PredictionGeneratedEvent here using Pub/Sub client
 
 
-# =============================
-# ai-classification-fn/function.json
-# =============================
+### ai-classification-fn/function.json
+
 {
   "name": "ai-classify",
   "entryPoint": "classify",
@@ -242,12 +235,10 @@ def classify(event, context):
   }
 }
 
-# NOTE: Replace YOUR_PROJECT_ID with your GCP project ID
+### NOTE: Replace YOUR_PROJECT_ID with your GCP project ID
 
+### gcp/cloudbuild.yaml
 
-# =============================
-# gcp/cloudbuild.yaml
-# =============================
 steps:
   - name: 'gcr.io/cloud-builders/docker'
     args: ['build', '-t', 'gcr.io/YOUR_PROJECT_ID/patient-service', '.']
@@ -258,29 +249,31 @@ steps:
            '--image', 'gcr.io/YOUR_PROJECT_ID/patient-service',
            '--region', 'europe-west1', '--platform', 'managed']
 
-# NOTE: Replace YOUR_PROJECT_ID with your actual project ID
+### NOTE: Replace YOUR_PROJECT_ID with your actual project ID
 
 
-# =============================
-# gcp/pubsub-topics.sh
-# =============================
-#!/bin/bash
+
+### gcp/pubsub-topics.sh
+
+!/bin/bash
+
 gcloud pubsub topics create MRIUploadedEvent
+
 gcloud pubsub topics create PredictionGeneratedEvent
+
 gcloud pubsub topics create FeedbackSubmittedEvent
 
 
-# =============================
-# gcp/secrets.env
-# =============================
-# Placeholder for secrets like bucket names or model URI
+### gcp/secrets.env
+
+### Placeholder for secrets like bucket names or model URI
+
 MODEL_BUCKET=gs://YOUR_BUCKET_NAME/model.pkl
-# NOTE: Replace YOUR_BUCKET_NAME
 
+### NOTE: Replace YOUR_BUCKET_NAME
 
-# =============================
-# common/models.py
-# =============================
+### common/models.py
+
 from pydantic import BaseModel
 
 class Patient(BaseModel):
@@ -294,12 +287,15 @@ class DiagnosisPrediction(BaseModel):
     confidence: float
 
 
-# ============================================================
 # III. FINAL CHECKLIST FOR YOU
-# ============================================================
-# [ ] Replace ALL placeholders like YOUR_PROJECT_ID or YOUR_BUCKET_NAME
-# [ ] Ensure you enable Cloud Functions, Pub/Sub, and Cloud Run in GCP
-# [ ] Store trained model in GCS manually
-# [ ] Setup permissions for Cloud Run + Pub/Sub
-# [ ] Add full README.md with run and test instructions
+
+Replace ALL placeholders like YOUR_PROJECT_ID or YOUR_BUCKET_NAME
+
+Ensure you enable Cloud Functions, Pub/Sub, and Cloud Run in GCP
+
+Store trained model in GCS manually
+
+Setup permissions for Cloud Run + Pub/Sub
+
+Add full README.md with run and test instructions
 
