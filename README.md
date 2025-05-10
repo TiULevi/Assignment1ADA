@@ -166,11 +166,13 @@ Automated pipelines using **Google Cloud Build**.
 ### patient-service/main.py
 
 from flask import Flask, request, jsonify
+
 app = Flask(__name__)
 
 patients = {}  # Simulated storage
 
 @app.route('/patients', methods=['POST'])
+
 def add_patient():
 
     data = request.json
@@ -179,11 +181,13 @@ def add_patient():
     return jsonify({'status': 'created'}), 201
 
 @app.route('/patients/<patient_id>', methods=['GET'])
+
 def get_patient(patient_id):
 
     return jsonify(patients.get(patient_id, {}))
 
 @app.route('/patients/<patient_id>', methods=['PUT'])
+
 def update_patient(patient_id):
 
     data = request.json
@@ -197,26 +201,35 @@ if __name__ == '__main__':
 
 
 ### Dockerfile (for REST services)
+
 FROM python:3.10-slim
+
 WORKDIR /app
+
 COPY requirements.txt ./
+
 RUN pip install --no-cache-dir -r requirements.txt
+
 COPY . .
+
 CMD ["python", "main.py"]
 
 
 ### requirements.txt (for REST services)
 
 Flask==2.2.5
+
 google-cloud-pubsub
 
 
 ### ai-classification-fn/main.py
 
 import base64
+
 import json
 
 def classify(event, context):
+
     message = base64.b64decode(event['data']).decode('utf-8')
     print("Received MRIUploadedEvent:", message)
 
@@ -230,13 +243,20 @@ def classify(event, context):
 ### ai-classification-fn/function.json
 
 {
+
   "name": "ai-classify",
+  
   "entryPoint": "classify",
+  
   "runtime": "python310",
+  
   "trigger": {
+  
     "eventType": "google.pubsub.topic.publish",
     "resource": "projects/YOUR_PROJECT_ID/topics/MRIUploadedEvent"
+    
   }
+  
 }
 
 ### NOTE: Replace YOUR_PROJECT_ID with your GCP project ID
@@ -244,12 +264,17 @@ def classify(event, context):
 ### gcp/cloudbuild.yaml
 
 steps:
+
   - name: 'gcr.io/cloud-builders/docker'
+    
     args: ['build', '-t', 'gcr.io/YOUR_PROJECT_ID/patient-service', '.']
+    
     dir: 'patient-service'
 
   - name: 'gcr.io/cloud-builders/gcloud'
+    
     args: ['run', 'deploy', 'patient-service',
+    
            '--image', 'gcr.io/YOUR_PROJECT_ID/patient-service',
            '--region', 'europe-west1', '--platform', 'managed']
 
