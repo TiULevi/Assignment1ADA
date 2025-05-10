@@ -172,6 +172,7 @@ patients = {}  # Simulated storage
 
 @app.route('/patients', methods=['POST'])
 def add_patient():
+
     data = request.json
     patient_id = data['id']
     patients[patient_id] = data
@@ -179,15 +180,18 @@ def add_patient():
 
 @app.route('/patients/<patient_id>', methods=['GET'])
 def get_patient(patient_id):
+
     return jsonify(patients.get(patient_id, {}))
 
 @app.route('/patients/<patient_id>', methods=['PUT'])
 def update_patient(patient_id):
+
     data = request.json
     patients[patient_id] = data
     return jsonify({'status': 'updated'})
 
 if __name__ == '__main__':
+
     app.run(debug=True)
 
 
