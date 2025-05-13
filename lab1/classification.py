@@ -164,7 +164,7 @@ def main():
     print(classification_report(y_test, y_test_pred_knn))
 
     # Save the best KNN model
-    model_filename = 'knn_model.pkl'
+    model_filename = 'prediction-api/knn_model.pkl'
     joblib.dump(best_knn_model, model_filename)
     print(f"\nBest KNN model saved to {model_filename}")
 
