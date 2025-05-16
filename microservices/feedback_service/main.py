@@ -9,12 +9,16 @@ FEEDBACKS = []
 def submit_feedback():
     data = request.get_json()
     FEEDBACKS.append(data)
-    # In real: publish to Pub/Sub FeedbackSubmittedEvent
+    # TODO: Publish FeedbackSubmittedEvent to Pub/Sub here
     return jsonify({"status": "feedback received", "feedback": data}), 201
 
 @app.route('/feedbacks', methods=['GET'])
 def list_feedbacks():
     return jsonify(FEEDBACKS), 200
+
+@app.route('/health', methods=['GET'])
+def health():
+    return jsonify({"status": "ok"}), 200
 
 def feedback_handler(event, context):
     message = base64.b64decode(event['data']).decode('utf-8')
