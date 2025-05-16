@@ -1,0 +1,15 @@
+<html>
+<head><title>Prediction Dashboard</title></head>
+<body>
+  <h2>Prediction Results for Patient: {{patient_id}}</h2>
+  <p><b>Diagnosis:</b> {{diagnosis}}</p>
+  <p><b>Confidence:</b> {{confidence}}</p>
+  <h3>Model Performance Metrics</h3>
+  <ul>
+    <li>Accuracy: {{metrics['accuracy']}}</li>
+    <li>Precision: {{metrics['precision']}}</li>
+    <li>Recall: {{metrics['recall']}}</li>
+    <li>F1 Score: {{metrics['f1']}}</li>
+  </ul>
+</body>
+</html>
