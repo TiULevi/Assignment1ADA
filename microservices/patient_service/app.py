@@ -4,7 +4,7 @@ import pandas as pd
 import os
 import io
 
-GCS_BUCKET = "ada2024-450119"
+GCS_BUCKET = "ada2-training"
 GCS_PATIENTS_PATH = "training_sets/Full_Image_data.pkl"
 
 app = Flask(__name__)
