@@ -12,7 +12,7 @@ gcloud functions deploy feedback_handler \
   --runtime python310 \
   --trigger-topic FeedbackSubmittedEvent \
   --entry-point feedback_handler \
-  --region europe-west1 \
+  --region us-central1 \
   --source microservices/feedback_service
 
 ## Create Pub/Sub Topics
