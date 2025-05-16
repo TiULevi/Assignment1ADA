@@ -248,4 +248,6 @@ if __name__ == "__main__":
     for f_path in [dummy_img_pair_path, dummy_hdr_pair_path, converted_output_path]:
         if os.path.exists(f_path):
             os.remove(f_path)
-            print(f"Cleaned up {f_path}") 
+            print(f"Cleaned up {f_path}")
+
+    print("preprocess.py script finished.") 

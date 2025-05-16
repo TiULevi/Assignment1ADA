@@ -6,13 +6,58 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import classification_report
 import joblib
+import os
+from google.cloud import storage # Added for GCS
+import io # Added for downloading GCS object as bytes
 
-def load_and_preprocess_data(pickle_path="Full_Image_data.pkl"):
-    """Loads and preprocesses the data from the pickle file."""
+# --- GCS Configuration ---
+# Replace with your actual bucket and file paths
+GCS_BUCKET_NAME = "ada2-training"
+TRAINING_DATA_GCS_PATH = "training_sets/Full_Image_data.pkl" # e.g., "data/training_sets/Full_Image_data.pkl"
+MODEL_OUTPUT_GCS_PATH = "models/knn_model.pkl" # e.g., "models/knn_model.pkl"
+# --- End GCS Configuration ---
+
+def download_blob_to_memory(bucket_name, source_blob_name):
+    """Downloads a blob from GCS into memory."""
+    storage_client = storage.Client()
+    bucket = storage_client.bucket(bucket_name)
+    blob = bucket.blob(source_blob_name)
+    
     try:
-        data = pd.read_pickle(pickle_path)
-    except FileNotFoundError:
-        print(f"Error: The file {pickle_path} was not found. Please ensure preprocess.py has been run or the file exists.")
+        print(f"Attempting to download gs://{bucket_name}/{source_blob_name}...")
+        file_as_bytes = blob.download_as_bytes()
+        print(f"Successfully downloaded gs://{bucket_name}/{source_blob_name} to memory.")
+        return file_as_bytes
+    except Exception as e:
+        print(f"Error downloading gs://{bucket_name}/{source_blob_name}: {e}")
+        raise
+
+def upload_blob_from_memory(bucket_name, file_obj, destination_blob_name):
+    """Uploads a file object to GCS."""
+    storage_client = storage.Client()
+    bucket = storage_client.bucket(bucket_name)
+    blob = bucket.blob(destination_blob_name)
+
+    try:
+        print(f"Attempting to upload to gs://{bucket_name}/{destination_blob_name}...")
+        blob.upload_from_file(file_obj, content_type='application/octet-stream')
+        print(f"Successfully uploaded to gs://{bucket_name}/{destination_blob_name}.")
+    except Exception as e:
+        print(f"Error uploading to gs://{bucket_name}/{destination_blob_name}: {e}")
+        raise
+
+def load_and_preprocess_data(gcs_bucket_name=GCS_BUCKET_NAME, gcs_pickle_path=TRAINING_DATA_GCS_PATH):
+    """Loads and preprocesses the data from a pickle file in GCS."""
+    try:
+        print(f"Loading data from GCS: gs://{gcs_bucket_name}/{gcs_pickle_path}")
+        pickle_bytes = download_blob_to_memory(gcs_bucket_name, gcs_pickle_path)
+        data = pd.read_pickle(io.BytesIO(pickle_bytes))
+        print("Data loaded successfully from GCS.")
+    except FileNotFoundError: # This might be redundant if download_blob_to_memory raises its own specific errors
+        print(f"Error: The file gs://{gcs_bucket_name}/{gcs_pickle_path} was not found in GCS.")
+        return None, None
+    except Exception as e:
+        print(f"Error loading data from GCS: {e}")
         return None, None
     
     # Also drop rows where Images or Group are missing
@@ -54,6 +99,10 @@ def load_and_preprocess_data(pickle_path="Full_Image_data.pkl"):
     # Each image is expected to be 3D (e.g., 64x64x32 from the 'fourth' slice)
     try:
         # Check if images are already numpy arrays and have 3 dimensions
+        if 'Images' not in data.columns:
+            print("Error: 'Images' column is missing from the loaded data.")
+            return None, None
+
         if not data['Images'].apply(lambda x: isinstance(x, np.ndarray) and x.ndim == 3).all():
             print("Error: Not all entries in 'Images' column are 3D NumPy arrays.")
             # Attempt to describe the problematic entries
@@ -163,10 +212,29 @@ def main():
     print("\nKNN Test Set Classification Report:")
     print(classification_report(y_test, y_test_pred_knn))
 
-    # Save the best KNN model
-    model_filename = 'prediction-api/knn_model.pkl'
-    joblib.dump(best_knn_model, model_filename)
-    print(f"\nBest KNN model saved to {model_filename}")
+    # Save the best KNN model to GCS
+    try:
+        print(f"Saving model to GCS: gs://{GCS_BUCKET_NAME}/{MODEL_OUTPUT_GCS_PATH}")
+        model_bytes_io = io.BytesIO()
+        joblib.dump(best_knn_model, model_bytes_io)
+        model_bytes_io.seek(0) # Reset stream position to the beginning
+        upload_blob_from_memory(GCS_BUCKET_NAME, model_bytes_io, MODEL_OUTPUT_GCS_PATH)
+        print(f"Best KNN model saved to gs://{GCS_BUCKET_NAME}/{MODEL_OUTPUT_GCS_PATH}")
+    except Exception as e:
+        print(f"Error saving model to GCS: {e}")
+
+    # ---- Old local saving logic ----
+    # # Save the best KNN model to the prediction_service directory
+    # # Relative path from training_service/ to prediction_service/ is ../prediction_service/
+    # model_output_dir = '../prediction_service'
+    # if not os.path.exists(model_output_dir):
+    #     os.makedirs(model_output_dir) # Create if it doesn't exist, though it should
+    #     print(f"Created directory: {model_output_dir}")
+        
+    # model_filename = os.path.join(model_output_dir, 'knn_model.pkl')
+    # joblib.dump(best_knn_model, model_filename)
+    # print(f"\nBest KNN model saved to {model_filename}")
+    # ---- End old local saving logic ----
 
 if __name__ == "__main__":
     main() 
