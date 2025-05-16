@@ -1,0 +1,3 @@
+gcloud pubsub topics create MRIUploadedEvent
+gcloud pubsub topics create PredictionGeneratedEvent
+gcloud pubsub topics create FeedbackSubmittedEvent
