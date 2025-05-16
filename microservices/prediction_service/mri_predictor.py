@@ -3,7 +3,7 @@ import nibabel as nib
 import joblib
 from google.cloud import storage
 
-GCS_BUCKET_NAME = "ada2024-450119"
+GCS_BUCKET_NAME = "ada2-training"
 MODEL_GCS_PATH = "models/knn_model.pkl"
 MODEL = None
 
