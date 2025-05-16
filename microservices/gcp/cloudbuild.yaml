@@ -1,0 +1,7 @@
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['build', '-t', 'gcr.io/ada2024-450119/patient-service', './patient_service']
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push', 'gcr.io/ada2024-450119/patient-service']
+- name: 'gcr.io/cloud-builders/gcloud'
+  args: ['run', 'deploy', 'patient-service', '--image', 'gcr.io/ada2024-450119/patient-service', '--region', 'us-central1', '--platform', 'managed']
